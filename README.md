@@ -1,16 +1,58 @@
-# React + Vite
+# 🚀 AI Interview Question Generator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Live App 👉 https://ai-interview-generator-tau.vercel.app/
 
-Currently, two official plugins are available:
+This is an AI-powered web application I built that generates **professional interview questions instantly** based on any job title entered by the user.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+It demonstrates how to integrate **LLM APIs into a real-world React application**.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 📌 Project Overview
 
-## Expanding the ESLint configuration
+This app allows users to:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Enter a job title (e.g. Customer Success Manager)
+- Click a button to generate questions
+- Get 3 AI-generated interview questions instantly
+
+The goal is to simulate how hiring teams can quickly generate interview questions using AI.
+
+---
+
+## ⚙️ Features
+
+- ⚡ AI-generated interview questions in real time
+- 🎯 Role-specific prompt engineering
+- 🔁 Loading state for better user experience
+- ⏱ Cooldown system to prevent API abuse (rate limit handling)
+- ❌ Error handling for API failures (401, 403, 404, 429)
+- 📱 Clean and responsive UI
+- 🚀 Fully deployed on Vercel
+
+---
+
+## 🛠️ Tech Stack
+
+- React (Frontend)
+- Vite (Build tool)
+- Axios (HTTP requests)
+- OpenRouter / LLM API (AI backend)
+- CSS (Styling)
+- Vercel (Deployment)
+
+---
+
+## 🌐 Live Demo
+
+👉 https://ai-interview-generator-tau.vercel.app/
+
+---
+
+## 📦 Installation & Setup
+
+Clone the repository:
+
+```bash
+git clone https://github.com/Kipkiruie/ai-interview-generator.git
+cd ai-interview-generator
