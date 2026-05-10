@@ -62,3 +62,11 @@ It simulates a real-world SaaS AI product by integrating:
 ```bash
 git clone https://github.com/Kipkiruie/ai-interview-generator.git
 cd ai-interview-generator
+
+## 👨‍💻 Author
+
+Elisha Ng’etich  
+Software Engineer | ALX Graduate  
+
+GitHub: https://github.com/Kipkiruie  
+Live Project: https://ai-interview-generator-tau.vercel.app/
