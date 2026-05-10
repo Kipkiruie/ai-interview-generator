@@ -11,13 +11,11 @@ function App() {
   const [roleLevel, setRoleLevel] = useState("mid");
   const [interviewType, setInterviewType] = useState("mixed");
 
-  // Load history
   useEffect(() => {
     const saved = localStorage.getItem("ai-history");
     if (saved) setHistory(JSON.parse(saved));
   }, []);
 
-  // Save history
   const saveHistory = (role, qs) => {
     const item = {
       role,
@@ -36,7 +34,7 @@ function App() {
     const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
 
     if (!apiKey) {
-      setError("API key missing. Add VITE_OPENROUTER_API_KEY to .env");
+      setError("Missing API key. Check environment variables.");
       return;
     }
 
@@ -51,25 +49,34 @@ function App() {
 
     try {
       const prompt = `
-You are a FAANG-level senior hiring manager conducting a structured interview.
+You are a FAANG-level principal hiring manager.
 
 ROLE: ${jobTitle}
 LEVEL: ${roleLevel}
 TYPE: ${interviewType}
 
 TASK:
-Generate EXACTLY 3 interview questions following this structure:
+Generate EXACTLY 3 interview questions.
 
-1. Behavioral Question (ownership, teamwork, communication)
-2. Role-Specific Question (${interviewType} aligned)
-3. Real-World Problem-Solving Scenario
+STRICT FORMAT RULES:
+Return ONLY this structure:
+
+Behavioral Question:
+<question>
+
+Role-Specific Question:
+<question>
+
+Problem-Solving Question:
+<question>
 
 RULES:
 - No numbering
+- No bullet points
 - No explanations
 - No extra text
-- Each question must be realistic like Google/Amazon interviews
-- Adjust difficulty based on level (junior, mid, senior)
+- Keep questions realistic like Google/Amazon interviews
+- Adapt difficulty based on role level
       `;
 
       const response = await axios.post(
@@ -80,7 +87,7 @@ RULES:
             {
               role: "system",
               content:
-                "You are a world-class FAANG technical recruiter designing structured interview assessments.",
+                "You are an expert FAANG interviewer generating structured hiring assessments.",
             },
             {
               role: "user",
@@ -100,22 +107,34 @@ RULES:
 
       const text = response.data?.choices?.[0]?.message?.content;
 
-      if (!text) throw new Error("Empty AI response");
+      if (!text) throw new Error("Empty response from AI");
 
-      // CLEAN PARSING (important for production reliability)
-      const formatted = text
+      // SAFER PARSING (production-grade)
+      const cleaned = text
         .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+      let parsed = cleaned.filter((l) =>
+        l.toLowerCase().includes("question") === false || l.includes("?")
+      );
+
+      parsed = parsed
         .map((q) =>
           q
-            .replace(/^\d+[\.\-\)]\s*/, "") // remove numbering
-            .replace(/^[-*]\s*/, "") // remove bullet points
+            .replace(/^(behavioral question:|role-specific question:|problem-solving question:)/i, "")
             .trim()
         )
         .filter(Boolean)
-        .slice(0, 3); // force exactly 3 questions
+        .slice(0, 3);
 
-      setQuestions(formatted);
-      saveHistory(jobTitle, formatted);
+      // fallback safety
+      while (parsed.length < 3) {
+        parsed.push("AI did not return a complete question. Please retry.");
+      }
+
+      setQuestions(parsed);
+      saveHistory(jobTitle, parsed);
     } catch (err) {
       console.error(err);
 
@@ -124,15 +143,15 @@ RULES:
       if (status === 401) setError("Invalid API key (401)");
       else if (status === 403) setError("Access denied (403)");
       else if (status === 404) setError("Model not found (404)");
-      else if (status === 429) setError("Too many requests. Please wait.");
-      else setError("Something went wrong. Check console.");
+      else if (status === 429) setError("Rate limit exceeded. Try again.");
+      else setError("Unexpected error occurred.");
     } finally {
       setLoading(false);
     }
   };
 
   const exportQuestions = () => {
-    const text = questions.join("\n");
+    const text = questions.join("\n\n");
     const blob = new Blob([text], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
 
@@ -149,7 +168,6 @@ RULES:
         <h1>AI Interview SaaS Generator</h1>
         <p>Generate structured, FAANG-level interview questions instantly</p>
 
-        {/* INPUT */}
         <input
           type="text"
           placeholder="e.g. Software Engineer, PM, Customer Success Manager"
@@ -158,7 +176,6 @@ RULES:
           disabled={loading}
         />
 
-        {/* CONTROLS */}
         <div className="row">
           <select value={roleLevel} onChange={(e) => setRoleLevel(e.target.value)}>
             <option value="junior">Junior</option>
@@ -173,21 +190,18 @@ RULES:
           </select>
         </div>
 
-        {/* BUTTON */}
         <button onClick={generateQuestions} disabled={loading}>
           {loading ? "Generating..." : "Generate Questions"}
         </button>
 
         {error && <p className="error">{error}</p>}
 
-        {/* EMPTY STATE */}
         {!loading && questions.length === 0 && (
           <p className="empty-state">
             Enter a role to generate structured interview questions
           </p>
         )}
 
-        {/* RESULTS */}
         <div className="results">
           {questions.map((q, i) => (
             <div key={i} className="question">
@@ -203,14 +217,12 @@ RULES:
           ))}
         </div>
 
-        {/* EXPORT */}
         {questions.length > 0 && (
           <button onClick={exportQuestions} className="secondary-btn">
             Export Questions
           </button>
         )}
 
-        {/* HISTORY */}
         {history.length > 0 && (
           <div className="history">
             <h3>Recent Generations</h3>
